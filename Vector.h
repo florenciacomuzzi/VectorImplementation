@@ -1,6 +1,7 @@
 #include <iostream>
 #include <exception>
 #include <stdexcept>
+#include <new> //needed for BAD_ALLOC
 using namespace std;
 
 template <class T>
@@ -16,8 +17,8 @@ class Vector{
                capacity *= 2;
                try{
                     T* temp = new T[capacity];
-               }catch(exception& e){
-                    cout << "ERROR: BAD_ALLOC...FAILED TO ALLOCATE" << endl;
+               }catch(bad_alloc){
+                    cout << "ERROR: BAD_ALLOC...FAILED TO ALLOCATE MEMORY" << endl;
                     exit(1);
                }
                for(int i = 0;i < size;i++){
@@ -32,7 +33,7 @@ class Vector{
           { return size;}
           int getCapacity()
           { return capacity;}
-          void push_back(const int& elt) //insert element elt at end of vector
+          void push_back(const T& elt) //insert element elt at end of vector
           {
                if(size == capacity)//current array is full
                     grow();
@@ -52,7 +53,7 @@ class Vector{
                     exit(1);
                }
           }
-          int& at(int pos)  //returns reference to element at position pos if pos is valid
+          T& at(int pos)  //returns reference to element at position pos if pos is valid
           {
                try{
                     if(pos < size && pos >= 0){
@@ -66,7 +67,7 @@ class Vector{
                 }
           }
 
-          int& front()
+          T& front()
           {
                 try{
                     if(pos < size && pos >= 0){
@@ -79,7 +80,7 @@ class Vector{
                      exit(1);
                 }
           }
-          int& back()
+          T& back()
           {
                try{
                     if(pos < size && pos >= 0){
@@ -97,14 +98,14 @@ class Vector{
                   return true;
               return false;
           }
-          void insert(const int& elt, int pos)  //insert element elt at position pos
+          void insert(const T& elt, int pos)  //insert element elt at position pos
           {
                try{
                    if(size >= 1){
                          if(size == capacity)
                               grow();
                          for(int i = size; i > pos; i++){
-                              arr[i] = arr[i -1];
+                              arr[i] = arr[i - 1];
                          }
                          arr[pos] = elt;
                          size++;
@@ -117,12 +118,14 @@ class Vector{
                    exit(1);
                }
           }
+
+          //unfinished
           void erase(int pos)   //deletes element at position pos
           {
               try{
                   if(size >= 1){
                         for(int i = size; i > pos; i++){
-                             arr[i] = arr[i -1];
+                             arr[i] = arr[i - 1];
                         }
                         arr[pos] = elt;
                         size++;
@@ -139,19 +142,42 @@ class Vector{
           //overloaded operators
           //overloaded operator= required to prevent memberwise assignment
           //returns value of left operand to allow multiple assignment stmts, i.e. a = b = c
-          Vector<int>& operator=(const Vector& v)
+          Vector<T>& operator=(const Vector& v)
           {
                if(size > 0){         //if vector not empty, clear first
                    delete [] arr;
                }
-               size = v.size;       //implicit this parameter
-               capacity = v.capacity;
+               size = v.getSize();       //implicit this parameter
+               capacity = v.getCapacity();
           }
           int& operator[](int n)    //returns reference to element at position n
           {
                 return arr[n];
           }
-
-
-
+          //default constructor
+          Vector(){
+              size = 0;
+              capacity = 10;
+              try{
+                   arr = new T[capacity];
+              }catch(bad_alloc){
+                   cout << "ERROR: BAD_ALLOC...FAILED TO ALLOCATE MEMORY" << endl;
+                   exit(1);
+              }
+          }
+          //constructor
+          //prevents memberwise assignment i.e. two objects pointing to same address
+          //usage: v1(v2);
+          Vector(const Vector<T>& v){
+               size = v.size();  //must use mutator function for private members
+               capacity = v.getCapacity();
+               try{
+                    arr = new T[capacity];
+               }catch(bad_alloc){
+                    cout << "ERROR: BAD_ALLOC...FAILED TO ALLOCATE MEMORY" << endl;
+               }
+               for(int i = 0; i < size; i++){
+                    arr[i] = v.at(i);   //at method checks bounds
+               }
+          }
 }
