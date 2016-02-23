@@ -26,7 +26,8 @@ int main() {
           assert(v1.at(i)==arr[i]);
         }
 
-        Vector<int> v2 = v1;
+        Vector<int> v2;
+        v2 = v1;
         assert(v2.size()==v1.size());
         for(int i = 0; i < ARRSIZE; i++) {
           assert(v2[i]==v1[i]);
